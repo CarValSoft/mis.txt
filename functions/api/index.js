@@ -1,20 +1,64 @@
-export async function onRequest() {
+export async function onRequest(context) {
 
-  const url =
+  const request = context.request;
+
+  const API =
   "https://script.google.com/macros/s/AKfycbwJGiaovAM65aBjhM6ZRoUZjuGMsJ0JExyMiqjH7pRWbWV6zvT9f59VwirJaPm_Ylp6/exec";
 
-  const r = await fetch(url);
+  if(request.method === "GET"){
 
-  const html = await r.text();
+    const url = new URL(request.url);
 
-  return new Response(html, {
+    const action =
+    url.searchParams.get("action");
 
-    headers: {
+    const password =
+    url.searchParams.get("password");
 
-      "Content-Type":"text/html;charset=UTF-8"
+    const r = await fetch(
+      `${API}?action=${action}&password=${password}`
+    );
 
-    }
+    const text = await r.text();
 
-  });
+    return new Response(text, {
+
+      headers:{
+        "Content-Type":"application/json"
+      }
+
+    });
+
+  }
+
+  if(request.method === "POST"){
+
+    const body = await request.text();
+
+    const r = await fetch(API, {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body
+
+    });
+
+    const text = await r.text();
+
+    return new Response(text, {
+
+      headers:{
+        "Content-Type":"application/json"
+      }
+
+    });
+
+  }
+
+  return new Response("Método no permitido");
 
 }
