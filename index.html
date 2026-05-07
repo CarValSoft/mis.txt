@@ -10,57 +10,121 @@
 
 <style>
 
+html,
 body{
     margin:0;
-    padding:20px;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
     background:#000;
-    color:#fff;
     font-family:Arial;
 }
 
-#loginBox,
-#editorBox{
-    max-width:900px;
+/* LOGIN */
+
+#loginWrap{
+    width:350px;
+    margin:14px auto 0 auto;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    position:relative;
+    z-index:20;
 }
 
-input{
-    width:100%;
-    padding:12px;
+#password{
+    width:120px;
+    padding:10px;
     box-sizing:border-box;
-    margin-top:10px;
-    font-size:16px;
     background:#111;
     color:#fff;
     border:none;
     outline:none;
+    font-size:15px;
 }
 
-textarea{
-    width:100%;
-    height:70vh;
-    background:#111;
-    color:#fff;
+#loginStatus{
+
+    color:#aaa;
+    font-size:14px;
+    white-space:nowrap;
+
+}
+
+#loginStatus a{
+
+    color:#aaa;
+    text-decoration:none;
+    cursor:pointer;
+
+}
+
+/* EDITOR */
+
+#editor{
+    width:100vw;
+    height:100vh;
+    margin:0;
+    padding:0;
     border:none;
     outline:none;
     resize:none;
-    padding:15px;
+    background:#111;
+    color:#fff;
     box-sizing:border-box;
     font-size:16px;
-    margin-top:10px;
+    font-family:Consolas, monospace;
 }
 
-button{
-    margin-top:10px;
-    padding:10px 25px;
+/* SAVE BAR */
+
+#saveWrap{
+
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:12px;
+
+    width:450px;
+
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+    opacity:0;
+
+    transition:opacity .18s ease;
+
+    z-index:50;
+
+}
+
+#saveWrap:hover{
+    opacity:1;
+}
+
+#saveWrap.show{
+    opacity:1;
+}
+
+#saveBtn{
+
+    padding:10px 22px;
+    border:none;
     cursor:pointer;
+
 }
 
-#status{
-    margin-top:10px;
+#saveStatus{
+
+    color:#aaa;
+    font-size:14px;
+    white-space:nowrap;
+
 }
 
 .hidden{
-    display:none;
+    display:none !important;
 }
 
 </style>
@@ -69,7 +133,9 @@ button{
 
 <body>
 
-<div id="loginBox">
+<!-- LOGIN -->
+
+<div id="loginWrap">
 
     <input
     type="password"
@@ -77,27 +143,55 @@ button{
     placeholder="Contraseña"
     autofocus>
 
+    <div id="loginStatus">
+
+        <a onclick="entrar()">
+        Listo.
+        </a>
+
+    </div>
+
 </div>
 
-<div id="editorBox" class="hidden">
+<!-- EDITOR -->
 
-    <textarea id="editor"></textarea>
+<textarea
+id="editor"
+class="hidden"></textarea>
 
-    <br>
+<!-- SAVE -->
 
-    <button onclick="guardar()">
+<div id="saveWrap">
+
+    <button
+    id="saveBtn"
+    onclick="guardar()">
+
     Guardar cambios
+
     </button>
 
-</div>
+    <div id="saveStatus"></div>
 
-<div id="status">
-Listo.
 </div>
 
 <script>
 
 let PASSWORD = "";
+
+const editor =
+document.getElementById("editor");
+
+const loginStatus =
+document.getElementById("loginStatus");
+
+const saveWrap =
+document.getElementById("saveWrap");
+
+const saveStatus =
+document.getElementById("saveStatus");
+
+/* ENTER */
 
 document
 .getElementById("password")
@@ -111,6 +205,47 @@ document
 
 });
 
+/* SAVE BAR VISIBILITY */
+
+document.addEventListener("mousemove", e => {
+
+    if(
+        window.innerHeight - e.clientY < 70
+    ){
+
+        saveWrap.style.opacity = "1";
+
+    }else{
+
+        if(!saveWrap.classList.contains("show")){
+
+            saveWrap.style.opacity = "0";
+
+        }
+
+    }
+
+});
+
+/* TEMP MESSAGE */
+
+function flashSaveBar(){
+
+    saveWrap.classList.add("show");
+
+    clearTimeout(window.__saveTimer);
+
+    window.__saveTimer =
+    setTimeout(()=>{
+
+        saveWrap.classList.remove("show");
+
+    },2000);
+
+}
+
+/* LOGIN */
+
 async function entrar(){
 
     PASSWORD =
@@ -118,7 +253,7 @@ async function entrar(){
 
     if(!PASSWORD){
 
-        document.getElementById("status").innerText =
+        loginStatus.innerHTML =
         "Ingresa contraseña.";
 
         return;
@@ -128,48 +263,52 @@ async function entrar(){
     try{
 
         const r = await fetch(
+
             "/api?action=get&password=" +
+
             encodeURIComponent(PASSWORD)
+
         );
 
         const data = await r.json();
 
         if(!data.ok){
 
-            document.getElementById("status").innerText =
-            data.error;
+            loginStatus.innerHTML =
+            "Contraseña incorrecta.";
 
             return;
 
         }
 
-        document.getElementById("editor").value =
+        editor.value =
         data.content;
 
-        document.getElementById("loginBox")
+        editor.classList.remove("hidden");
+
+        document
+        .getElementById("loginWrap")
         .classList.add("hidden");
 
-        document.getElementById("editorBox")
-        .classList.remove("hidden");
-
-        document.getElementById("status").innerText =
+        saveStatus.innerText =
         "Archivo cargado.";
+
+        flashSaveBar();
 
     }catch(err){
 
-        document.getElementById("status").innerText =
+        loginStatus.innerHTML =
         err.toString();
 
     }
 
 }
 
+/* SAVE */
+
 async function guardar(){
 
     try{
-
-        const content =
-        document.getElementById("editor").value;
 
         const r = await fetch("/api", {
 
@@ -182,7 +321,7 @@ async function guardar(){
             body:JSON.stringify({
 
                 password:PASSWORD,
-                content:content
+                content:editor.value
 
             })
 
@@ -190,13 +329,22 @@ async function guardar(){
 
         const data = await r.json();
 
-        document.getElementById("status").innerText =
-        data.message || data.error;
+        saveStatus.innerText =
+
+        data.message ||
+
+        data.error ||
+
+        "Guardado correctamente.";
+
+        flashSaveBar();
 
     }catch(err){
 
-        document.getElementById("status").innerText =
+        saveStatus.innerText =
         err.toString();
+
+        flashSaveBar();
 
     }
 
