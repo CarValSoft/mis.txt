@@ -54,10 +54,15 @@ body{
 #loginStatus a{
 
     color:#aaa;
-    text-decoration:underline;
+    text-decoration:none;
     cursor:pointer;
 
 }
+
+    #loginStatus a:hover{
+    text-decoration:underline;
+
+}        
 
 /* EDITOR */
 
@@ -85,7 +90,9 @@ body{
     transform:translateX(-50%);
     bottom:12px;
 
-    width:250px;
+    width:240px;
+
+    background-color: rgba(56, 68, 87, 0.5);
 
     display:flex;
     align-items:center;
@@ -124,7 +131,7 @@ body{
 }
 
 .hidden{
-    display:none !important;
+    display:inline !important;
 }
 
 </style>
