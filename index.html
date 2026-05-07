@@ -84,6 +84,17 @@ body{
     box-sizing:border-box;
     font-size:16px;
     font-family:Consolas, monospace;
+    
+    tab-size: 78px;
+    -moz-tab-size: 78px; /* Soporte para Firefox */
+
+.estado-info {
+    font-family: sans-serif;
+    font-size: 0.8em;
+    margin-bottom: 5px;
+    color: #666;
+  }
+    
 }
 
 /* SAVE BAR */
@@ -180,15 +191,15 @@ class="hidden"></textarea>
 
 <div id="saveWrap">
 
-    <button
-    id="saveBtn"
-    onclick="guardar()">
-
-    Guardar cambios
-
-    </button>
+    <buttonid="saveBtn"onclick="guardar()">Guardar cambios</button>
 
     <div id="saveStatus"></div>
+
+    <div class="estado-info">
+    Modo Sangría (Tab): <span id="estadoTab">Activado</span> 
+    <small>(Presiona <b>ESC</b> para alternar)</small>
+            
+</div>
 
 </div>
 
@@ -366,6 +377,39 @@ async function guardar(){
     }
 
 }
+
+</script>
+
+<script>
+
+const textarea = document.getElementById('editor');
+const estadoTab = document.getElementById('estadoTab');
+let sangriaActiva = true;
+
+textarea.addEventListener('keydown', function(e) {
+  // Alternar el modo con la tecla ESC
+  if (e.key === 'Escape') {
+    sangriaActiva = !sangriaActiva;
+    estadoTab.innerText = sangriaActiva ? "Activado" : "Desactivado";
+    estadoTab.style.color = sangriaActiva ? "green" : "red";
+    return;
+  }
+
+  // Lógica para TAB
+  if (e.key === 'Tab' && sangriaActiva) {
+    e.preventDefault(); // Evita que el foco salte a otro elemento
+
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+
+    // Insertar el carácter de tabulación \t
+    this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+
+    // Reposicionar el cursor
+    this.selectionStart = this.selectionEnd = start + 1;
+  }
+});
+
 
 </script>
 
