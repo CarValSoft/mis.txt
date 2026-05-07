@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Editor TXT protegido</title>
+<title>TXT</title>
 
 <style>
 
@@ -29,6 +29,10 @@ input{
     box-sizing:border-box;
     margin-top:10px;
     font-size:16px;
+    background:#111;
+    color:#fff;
+    border:none;
+    outline:none;
 }
 
 textarea{
@@ -65,18 +69,13 @@ button{
 
 <body>
 
-<h1>Editor TXT protegido</h1>
-
 <div id="loginBox">
 
     <input
     type="password"
     id="password"
-    placeholder="Contraseña">
-
-    <button onclick="entrar()">
-    Entrar
-    </button>
+    placeholder="Contraseña"
+    autofocus>
 
 </div>
 
@@ -99,6 +98,18 @@ Listo.
 <script>
 
 let PASSWORD = "";
+
+document
+.getElementById("password")
+.addEventListener("keydown", function(e){
+
+    if(e.key === "Enter"){
+
+        entrar();
+
+    }
+
+});
 
 async function entrar(){
 
