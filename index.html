@@ -24,12 +24,19 @@ function recibirDatos(data){
 
 }
 
-const script = document.createElement("script");
+const s = document.createElement("script");
 
-script.src =
+s.src =
 "https://script.google.com/macros/s/AKfycbwJGiaovAM65aBjhM6ZRoUZjuGMsJ0JExyMiqjH7pRWbWV6zvT9f59VwirJaPm_Ylp6/exec?callback=recibirDatos";
 
-document.body.appendChild(script);
+s.onerror = () => {
+
+    document.getElementById("resultado").innerText =
+    "Error cargando JSONP";
+
+};
+
+document.body.appendChild(s);
 
 </script>
 
