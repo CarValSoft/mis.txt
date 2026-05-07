@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Frontend</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    padding:20px;
+}
+
+</style>
+
+</head>
+<body>
+
+<h1>Conectando...</h1>
+
+<div id="resultado">
+Cargando datos...
+</div>
+
+<script>
+
+function recibirDatos(data){
+
+    document.querySelector("h1").innerText =
+    "Conectado";
+
+    document.getElementById("resultado").innerHTML = `
+        <h2>${data.mensaje}</h2>
+        <p>${data.fecha}</p>
+    `;
+
+}
+
+const script = document.createElement("script");
+
+script.src =
+"https://script.google.com/macros/s/AKfycbzJH4pDm8u2jOE9-inWxV5-qf0b1_VHylZr1d5X9X5Uo47SDK141umlw8sJMxyA1yDJ/exec?callback=recibirDatos";
+
+script.onerror = () => {
+
+    document.getElementById("resultado").innerText =
+    "Error cargando API";
+
+};
+
+document.body.appendChild(script);
+
+</script>
+
+</body>
+</html>
