@@ -1,42 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Frontend</title>
-</head>
-
-<body>
-
-<h1>Frontend</h1>
-
-<div id="resultado">
-Cargando...
-</div>
 
 <script>
-
-fetch("/api")
-
-.then(r => r.json())
-
-.then(data => {
-
-    document.getElementById("resultado").innerHTML = `
-        <h2>${data.mensaje}</h2>
-        <p>${data.fecha || ""}</p>
-    `;
-
-})
-
-.catch(err => {
-
-    document.getElementById("resultado").innerText =
-    err.toString();
-
-});
-
+location.href="/api";
 </script>
 
+</head>
+<body>
 </body>
 </html>
