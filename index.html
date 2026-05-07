@@ -195,9 +195,7 @@ class="hidden"></textarea>
 
     <div id="saveStatus"></div>
 
-    <div class="estado-info">
-    Modo Sangría (Tab): <span id="estadoTab">Activado</span> 
-    <small>(Presiona <b>ESC</b> para alternar)</small>
+    <div id="indicadorTab" class="estado-tab" style="color: green;">↦</div>
             
 </div>
 
@@ -382,34 +380,33 @@ async function guardar(){
 
 <script>
 
-const textarea = document.getElementById('editor');
-const estadoTab = document.getElementById('estadoTab');
+const textarea = document.getElementById('miTextarea');
+const indicador = document.getElementById('indicadorTab');
 let sangriaActiva = true;
 
 textarea.addEventListener('keydown', function(e) {
-  // Alternar el modo con la tecla ESC
+  // Alternar modo con ESC
   if (e.key === 'Escape') {
     sangriaActiva = !sangriaActiva;
-    estadoTab.innerText = sangriaActiva ? "Activado" : "Desactivado";
-    estadoTab.style.color = sangriaActiva ? "green" : "red";
+    // Cambia color: Verde para activo, Rojo para inactivo
+    indicador.style.color = sangriaActiva ? "green" : "red";
     return;
   }
 
-  // Lógica para TAB
+  // Ejecutar sangría si está activo
   if (e.key === 'Tab' && sangriaActiva) {
-    e.preventDefault(); // Evita que el foco salte a otro elemento
+    e.preventDefault(); 
 
     const start = this.selectionStart;
     const end = this.selectionEnd;
 
-    // Insertar el carácter de tabulación \t
+    // Insertar tabulación
     this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
 
-    // Reposicionar el cursor
+    // Mantener posición del cursor
     this.selectionStart = this.selectionEnd = start + 1;
   }
 });
-
 
 </script>
 
