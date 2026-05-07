@@ -392,37 +392,7 @@ async function guardar(){
 
 </script>
 
-<script>
 
-const textarea = document.getElementById('editor');
-const indicador = document.getElementById('indicadorTab');
-let sangriaActiva = true;
-
-textarea.addEventListener('keydown', function(e) {
-  // Alternar modo con ESC
-  if (e.key === 'Escape') {
-    sangriaActiva = !sangriaActiva;
-    // Cambia color: Verde para activo, Rojo para inactivo
-    indicador.style.color = sangriaActiva ? "green" : "red";
-    return;
-  }
-
-  // Ejecutar sangría si está activo
-  if (e.key === 'Tab' && sangriaActiva) {
-    e.preventDefault(); 
-
-    const start = this.selectionStart;
-    const end = this.selectionEnd;
-
-    // Insertar tabulación
-    this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-
-    // Mantener posición del cursor
-    this.selectionStart = this.selectionEnd = start + 1;
-  }
-});
-
-</script>
 
 </body>
 </html>
