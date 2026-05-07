@@ -1,13 +1,143 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
+<html lang="es">
 
-<script>
-location.href="/api";
-</script>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Editor TXT</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial;
+    background:#111;
+    color:white;
+}
+
+textarea{
+    width:100%;
+    height:70vh;
+    background:#1e1e1e;
+    color:white;
+    border:none;
+    outline:none;
+    resize:none;
+    padding:15px;
+    box-sizing:border-box;
+    font-size:16px;
+}
+
+button{
+    margin-top:10px;
+    padding:10px 20px;
+    cursor:pointer;
+}
+
+#status{
+    margin-top:10px;
+    opacity:.8;
+}
+
+</style>
 
 </head>
+
 <body>
+
+<h1>Editor TXT protegido</h1>
+
+<textarea id="editor">
+Cargando...
+</textarea>
+
+<br>
+
+<button onclick="guardar()">
+Guardar
+</button>
+
+<div id="status"></div>
+
+<script>
+
+const PASSWORD = "123";
+
+async function cargar(){
+
+    try{
+
+        const r = await fetch(
+            "/api?action=get&password=" + PASSWORD
+        );
+
+        const data = await r.json();
+
+        if(!data.ok){
+
+            document.getElementById("status").innerText =
+            data.error;
+
+            return;
+
+        }
+
+        document.getElementById("editor").value =
+        data.content;
+
+    }catch(err){
+
+        document.getElementById("status").innerText =
+        err.toString();
+
+    }
+
+}
+
+async function guardar(){
+
+    try{
+
+        const content =
+        document.getElementById("editor").value;
+
+        const r = await fetch("/api", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                password:PASSWORD,
+                content:content
+
+            })
+
+        });
+
+        const data = await r.json();
+
+        document.getElementById("status").innerText =
+        data.message || data.error;
+
+    }catch(err){
+
+        document.getElementById("status").innerText =
+        err.toString();
+
+    }
+
+}
+
+cargar();
+
+</script>
+
 </body>
 </html>
