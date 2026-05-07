@@ -195,7 +195,7 @@ class="hidden"></textarea>
 
 <div id="saveWrap">
 
-    <button id="saveBtn"onclick="guardar()">Guardar</button>
+    <button id="saveBtn" onclick="guardar()">Guardar</button>
 
     <div id="saveStatus"></div>
 
@@ -379,6 +379,14 @@ async function guardar(){
     }
 
 }
+
+      textarea.addEventListener('keydown', function(e) {
+    // ATRIBUTO CTRL + S para Guardar
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault(); // Evita que el navegador intente guardar la página HTML
+      guardar();
+      return;
+    }
 
 </script>
 
