@@ -393,7 +393,49 @@ async function guardar(){
   // Tu función existente (asegúrate de que esté definida en tu código)
   function guardar() {
     console.log("Guardando contenido...");
-    // Aquí va tu lógica de guardado
+    async function guardar(){
+
+    try{
+
+        const r = await fetch("/api", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                password:PASSWORD,
+                content:editor.value
+
+            })
+
+        });
+
+        const data = await r.json();
+
+        saveStatus.innerText =
+
+        data.message ||
+
+        data.error ||
+
+        "Guardado.";
+
+        flashSaveBar();
+
+    }catch(err){
+
+        saveStatus.innerText =
+        err.toString();
+
+        flashSaveBar();
+
+    }
+
+}
     alert("¡Guardado exitoso!");
   }
 
