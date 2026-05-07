@@ -18,6 +18,19 @@ body{
     font-family:Arial;
 }
 
+#loginBox,
+#editorBox{
+    max-width:900px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    box-sizing:border-box;
+    margin-top:10px;
+    font-size:16px;
+}
+
 textarea{
     width:100%;
     height:70vh;
@@ -29,15 +42,21 @@ textarea{
     padding:15px;
     box-sizing:border-box;
     font-size:16px;
+    margin-top:10px;
 }
 
 button{
-    margin-top:15px;
+    margin-top:10px;
     padding:10px 25px;
+    cursor:pointer;
 }
 
 #status{
-    margin-top:15px;
+    margin-top:10px;
+}
+
+.hidden{
+    display:none;
 }
 
 </style>
@@ -48,33 +67,61 @@ button{
 
 <h1>Editor TXT protegido</h1>
 
-<textarea id="editor">
-Cargando...
-</textarea>
+<div id="loginBox">
 
-<br>
+    <input
+    type="password"
+    id="password"
+    placeholder="Contraseña">
 
-<button onclick="guardar()">
-Guardar
-</button>
+    <button onclick="entrar()">
+    Entrar
+    </button>
 
-<div id="status"></div>
+</div>
+
+<div id="editorBox" class="hidden">
+
+    <textarea id="editor"></textarea>
+
+    <br>
+
+    <button onclick="guardar()">
+    Guardar cambios
+    </button>
+
+</div>
+
+<div id="status">
+Listo.
+</div>
 
 <script>
 
-const PASSWORD = "123";
+let PASSWORD = "";
 
-async function cargar(){
+async function entrar(){
+
+    PASSWORD =
+    document.getElementById("password").value;
+
+    if(!PASSWORD){
+
+        document.getElementById("status").innerText =
+        "Ingresa contraseña.";
+
+        return;
+
+    }
 
     try{
 
         const r = await fetch(
-            "/api?action=get&password=" + PASSWORD
+            "/api?action=get&password=" +
+            encodeURIComponent(PASSWORD)
         );
 
         const data = await r.json();
-
-        console.log(data);
 
         if(!data.ok){
 
@@ -87,6 +134,12 @@ async function cargar(){
 
         document.getElementById("editor").value =
         data.content;
+
+        document.getElementById("loginBox")
+        .classList.add("hidden");
+
+        document.getElementById("editorBox")
+        .classList.remove("hidden");
 
         document.getElementById("status").innerText =
         "Archivo cargado.";
@@ -137,8 +190,6 @@ async function guardar(){
     }
 
 }
-
-cargar();
 
 </script>
 
