@@ -23,7 +23,7 @@ body{
 /* LOGIN */
 
 #loginWrap{
-    width:295px;
+    width:155px;
     margin:14px auto 0 auto;
     display:flex;
     align-items:center;
@@ -54,7 +54,7 @@ body{
 #loginStatus a{
 
     color:#aaa;
-    text-decoration:none;
+    text-decoration:underline;
     cursor:pointer;
 
 }
@@ -85,7 +85,7 @@ body{
     transform:translateX(-50%);
     bottom:12px;
 
-    width:350px;
+    width:250px;
 
     display:flex;
     align-items:center;
@@ -96,8 +96,6 @@ body{
     transition:opacity .18s ease;
 
     z-index:50;
-
-    background: red;
 
 }
 
@@ -256,7 +254,7 @@ async function entrar(){
     if(!PASSWORD){
 
         loginStatus.innerHTML =
-        "Ingresa contraseña.";
+        "Error.";
 
         return;
 
@@ -277,7 +275,7 @@ async function entrar(){
         if(!data.ok){
 
             loginStatus.innerHTML =
-            "Contraseña incorrecta.";
+            "Error.";
 
             return;
 
@@ -293,7 +291,7 @@ async function entrar(){
         .classList.add("hidden");
 
         saveStatus.innerText =
-        "Archivo cargado.";
+        "Cargado.";
 
         flashSaveBar();
 
@@ -337,7 +335,7 @@ async function guardar(){
 
         data.error ||
 
-        "Guardado correctamente.";
+        "Guardado.";
 
         flashSaveBar();
 
