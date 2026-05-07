@@ -7,6 +7,7 @@ export async function onRequest() {
 
   const text = await r.text();
 
+  // JSONP -> JSON
   const clean =
     text
     .replace(/^recibirDatos\(/, "")
