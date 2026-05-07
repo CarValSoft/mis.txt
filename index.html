@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 <meta charset="UTF-8">
 <title>Frontend</title>
@@ -15,28 +16,25 @@ Cargando...
 
 <script>
 
-function recibirDatos(data){
+fetch("/api")
+
+.then(r => r.json())
+
+.then(data => {
 
     document.getElementById("resultado").innerHTML = `
         <h2>${data.mensaje}</h2>
-        <p>${data.fecha}</p>
+        <p>${data.fecha || ""}</p>
     `;
 
-}
+})
 
-const s = document.createElement("script");
-
-s.src =
-"https://script.google.com/macros/s/AKfycbwJGiaovAM65aBjhM6ZRoUZjuGMsJ0JExyMiqjH7pRWbWV6zvT9f59VwirJaPm_Ylp6/exec?callback=recibirDatos";
-
-s.onerror = () => {
+.catch(err => {
 
     document.getElementById("resultado").innerText =
-    "Error cargando JSONP";
+    err.toString();
 
-};
-
-document.body.appendChild(s);
+});
 
 </script>
 
