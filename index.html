@@ -208,265 +208,107 @@ class="hidden"></textarea>
 </div>
 
 <script>
-
 let PASSWORD = "";
 
-const editor =
-document.getElementById("editor");
-
-const loginStatus =
-document.getElementById("loginStatus");
-
-const saveWrap =
-document.getElementById("saveWrap");
-
-const saveStatus =
-document.getElementById("saveStatus");
-
-/* ENTER */
-
-document
-.getElementById("password")
-.addEventListener("keydown", function(e){
-
-    if(e.key === "Enter"){
-
-        entrar();
-
-    }
-
-});
-
-/* SAVE BAR VISIBILITY */
-
-document.addEventListener("mousemove", e => {
-
-    if(
-        window.innerHeight - e.clientY < 70
-    ){
-
-        saveWrap.style.opacity = "1";
-
-    }else{
-
-        if(!saveWrap.classList.contains("show")){
-
-            saveWrap.style.opacity = "0";
-
-        }
-
-    }
-
-});
-
-/* TEMP MESSAGE */
-
-function flashSaveBar(){
-
-    saveWrap.classList.add("show");
-
-    clearTimeout(window.__saveTimer);
-
-    window.__saveTimer =
-    setTimeout(()=>{
-
-        saveWrap.classList.remove("show");
-
-    },2000);
-
-}
+const editor = document.getElementById("editor");
+const loginStatus = document.getElementById("loginStatus");
+const saveWrap = document.getElementById("saveWrap");
+const saveStatus = document.getElementById("saveStatus");
+const indicador = document.getElementById('indicadorTab');
+let sangriaActiva = true;
 
 /* LOGIN */
-
-async function entrar(){
-
-    PASSWORD =
-    document.getElementById("password").value;
-
-    if(!PASSWORD){
-
-        loginStatus.innerHTML =
-        "Error.";
-
+async function entrar() {
+    PASSWORD = document.getElementById("password").value;
+    if (!PASSWORD) {
+        loginStatus.innerHTML = "Error.";
         return;
-
     }
-
-    try{
-
-        const r = await fetch(
-
-            "/api?action=get&password=" +
-
-            encodeURIComponent(PASSWORD)
-
-        );
-
+    try {
+        const r = await fetch("/api?action=get&password=" + encodeURIComponent(PASSWORD));
         const data = await r.json();
-
-        if(!data.ok){
-
-            loginStatus.innerHTML =
-            "Error.";
-
+        if (!data.ok) {
+            loginStatus.innerHTML = "Error.";
             return;
-
         }
-
-        editor.value =
-        data.content;
-
+        editor.value = data.content;
         editor.classList.remove("hidden");
-
-        document
-        .getElementById("loginWrap")
-        .classList.add("hidden");
-
-        saveStatus.innerText =
-        "Cargado.";
-
+        document.getElementById("loginWrap").classList.add("hidden");
+        saveStatus.innerText = "Cargado.";
         flashSaveBar();
-
-    }catch(err){
-
-        loginStatus.innerHTML =
-        err.toString();
-
+    } catch (err) {
+        loginStatus.innerHTML = err.toString();
     }
-
 }
 
-/* SAVE */
-
-async function guardar(){
-
-    try{
-
+/* GUARDAR (Lógica corregida) */
+async function guardar() {
+    try {
         const r = await fetch("/api", {
-
-            method:"POST",
-
-            headers:{
-                "Content-Type":"application/json"
-            },
-
-            body:JSON.stringify({
-
-                password:PASSWORD,
-                content:editor.value
-
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                password: PASSWORD,
+                content: editor.value
             })
-
         });
 
         const data = await r.json();
-
-        saveStatus.innerText =
-
-        data.message ||
-
-        data.error ||
-
-        "Guardado.";
-
+        // Muestra el mensaje en saveStatus
+        saveStatus.innerText = data.message || data.error || "Guardado.";
         flashSaveBar();
-
-    }catch(err){
-
-        saveStatus.innerText =
-        err.toString();
-
+    } catch (err) {
+        saveStatus.innerText = err.toString();
         flashSaveBar();
-
     }
-
 }
 
-
-</script>
-
-<script>
-  const textarea = document.getElementById('editor');
-  const indicador = document.getElementById('indicadorTab');
-  let sangriaActiva = true;
-
-  // Tu función existente (asegúrate de que esté definida en tu código)
-  function guardar() {
-    console.log("Guardando contenido...");
-    async function guardar(){
-
-    try{
-
-        const r = await fetch("/api", {
-
-            method:"POST",
-
-            headers:{
-                "Content-Type":"application/json"
-            },
-
-            body:JSON.stringify({
-
-                password:PASSWORD,
-                content:editor.value
-
-            })
-
-        });
-
-        const data = await r.json();
-
-        saveStatus.innerText =
-
-        data.message ||
-
-        data.error ||
-
-        "Guardado.";
-
-        flashSaveBar();
-
-    }catch(err){
-
-        saveStatus.innerText =
-        err.toString();
-
-        flashSaveBar();
-
-    }
-
-}
-    alert("¡Guardado exitoso!");
-  }
-
-  textarea.addEventListener('keydown', function(e) {
-    // 1. ATRIBUTO CTRL + S para Guardar
+/* EVENTOS DEL EDITOR (Tab, Esc, Ctrl+S) */
+editor.addEventListener('keydown', function(e) {
+    // 1. CTRL + S para Guardar
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault(); // Evita que el navegador intente guardar la página HTML
-      guardar();
-      return;
+        e.preventDefault();
+        guardar();
+        return;
     }
 
     // 2. Alternar modo con ESC
     if (e.key === 'Escape') {
-      sangriaActiva = !sangriaActiva;
-      indicador.style.color = sangriaActiva ? "green" : "red";
-      return;
+        sangriaActiva = !sangriaActiva;
+        indicador.style.color = sangriaActiva ? "green" : "red";
+        return;
     }
 
-    // 3. Ejecutar sangría si está activo
+    // 3. Lógica de Sangría (TAB)
     if (e.key === 'Tab' && sangriaActiva) {
-      e.preventDefault(); 
-      const start = this.selectionStart;
-      const end = this.selectionEnd;
-
-      // Insertar tabulación
-      this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-
-      // Mantener posición del cursor
-      this.selectionStart = this.selectionEnd = start + 1;
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 1;
     }
-  });
+});
+
+/* AUXILIARES */
+function flashSaveBar() {
+    saveWrap.classList.add("show");
+    clearTimeout(window.__saveTimer);
+    window.__saveTimer = setTimeout(() => {
+        saveWrap.classList.remove("show");
+    }, 2000);
+}
+
+document.getElementById("password").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") entrar();
+});
+
+document.addEventListener("mousemove", e => {
+    if (window.innerHeight - e.clientY < 70) {
+        saveWrap.style.opacity = "1";
+    } else if (!saveWrap.classList.contains("show")) {
+        saveWrap.style.opacity = "0";
+    }
+});
 </script>
 
 </body>
