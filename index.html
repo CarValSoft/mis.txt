@@ -201,7 +201,7 @@ class="hidden"></textarea>
 
 <!-- SAVE -->
 
-<div id="saveWrap">
+<div id="saveWrap" class="hidden">
 
     <button id="saveBtn" onclick="guardar()">Guardar</button>
 
@@ -248,6 +248,18 @@ async function entrar() {
     }
 }
 
+async function entrar(){
+    // ... (tu lógica de fetch anterior)
+    if(data.ok){
+        editor.value = data.content;
+        editor.classList.remove("hidden");
+        saveWrap.classList.remove("hidden"); // <--- MOSTRAR BARRA AL LOGUEAR
+        document.getElementById("loginWrap").classList.add("hidden");
+        saveStatus.innerText = "Cargado.";
+        flashSaveBar();
+    }
+}
+
 /* GUARDAR (Con bloqueo de botón y estados visuales) */
 async function guardar() {
     // 1. Bloquear interfaz y mostrar "Guardando..."
@@ -272,7 +284,7 @@ async function guardar() {
         saveStatus.innerText = data.message || data.error || "Guardado.";
         
     } catch (err) {
-        saveStatus.innerText = "Error de conexión.";
+        saveStatus.innerText = "Sin conexión.";
         console.error(err);
     } finally {
         // 3. Desbloquear botón y programar el cierre
@@ -372,14 +384,19 @@ editor.addEventListener('keydown', function(e) {
     // 1. CTRL + S para Guardar
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        guardar();
+        if (!saveBtn.disabled) guardar();
         return;
     }
 
-    // 2. Alternar modo con ESC
+    // 2. Alternar modo con ESC (Ahora muestra la barra)
     if (e.key === 'Escape') {
+        e.preventDefault();
         sangriaActiva = !sangriaActiva;
+        
         indicador.style.color = sangriaActiva ? "green" : "red";
+        saveStatus.innerText = sangriaActiva ? "Sangría: ON" : "Sangría: OFF";
+        
+        flashSaveBar(); // Esto hace que #saveWrap aparezca 2 segundos
         return;
     }
 
@@ -393,13 +410,21 @@ editor.addEventListener('keydown', function(e) {
     }
 });
 
+
 /* AUXILIARES */
 function flashSaveBar() {
     saveWrap.classList.add("show");
+    saveWrap.style.opacity = "1"; // Forzar visibilidad inmediata
+
     clearTimeout(window.__saveTimer);
+
     window.__saveTimer = setTimeout(() => {
         saveWrap.classList.remove("show");
-    }, 2000);
+        // Solo ocultamos si el proceso no está "guardando" (botón habilitado)
+        if (!saveBtn.disabled) {
+            saveWrap.style.opacity = "0";
+        }
+    }, 1000);
 }
 
 document.getElementById("password").addEventListener("keydown", (e) => {
