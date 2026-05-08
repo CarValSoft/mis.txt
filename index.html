@@ -215,18 +215,32 @@ class="hidden"></textarea>
 
 <script>
 let PASSWORD = "";
+let sangriaActiva = true;
 
 const editor = document.getElementById("editor");
 const loginStatus = document.getElementById("loginStatus");
 const saveWrap = document.getElementById("saveWrap");
 const saveStatus = document.getElementById("saveStatus");
-const indicador = document.getElementById('indicadorTab');
 const saveBtn = document.getElementById("saveBtn");
-let sangriaActiva = true;
+const indicador = document.getElementById("indicadorTab");
+const passwordInput = document.getElementById("password");
+
+/* AUXILIARES */
+function flashSaveBar() {
+    saveWrap.classList.add("show");
+    saveWrap.style.opacity = "1";
+    clearTimeout(window.__saveTimer);
+    window.__saveTimer = setTimeout(() => {
+        saveWrap.classList.remove("show");
+        if (!saveWrap.matches(':hover')) {
+            saveWrap.style.opacity = "0";
+        }
+    }, 1000);
+}
 
 /* LOGIN */
 async function entrar() {
-    PASSWORD = document.getElementById("password").value;
+    PASSWORD = passwordInput.value;
     if (!PASSWORD) {
         loginStatus.innerHTML = "Error.";
         return;
@@ -240,29 +254,18 @@ async function entrar() {
         }
         editor.value = data.content;
         editor.classList.remove("hidden");
+        saveWrap.classList.remove("hidden"); // Mostrar barra al entrar
         document.getElementById("loginWrap").classList.add("hidden");
         saveStatus.innerText = "Cargado.";
         flashSaveBar();
     } catch (err) {
-        loginStatus.innerHTML = err.toString();
+        loginStatus.innerHTML = "Error de conexión.";
+        console.error(err);
     }
 }
 
-async function entrar(){
-    // ... (tu lógica de fetch anterior)
-    if(data.ok){
-        editor.value = data.content;
-        editor.classList.remove("hidden");
-        saveWrap.classList.remove("hidden"); // <--- MOSTRAR BARRA AL LOGUEAR
-        document.getElementById("loginWrap").classList.add("hidden");
-        saveStatus.innerText = "Cargado.";
-        flashSaveBar();
-    }
-}
-
-/* GUARDAR (Con bloqueo de botón y estados visuales) */
+/* GUARDAR */
 async function guardar() {
-    // 1. Bloquear interfaz y mostrar "Guardando..."
     saveBtn.disabled = true;
     saveStatus.innerText = "Guardando...";
     saveWrap.classList.add("show");
@@ -277,130 +280,40 @@ async function guardar() {
                 content: editor.value
             })
         });
-
         const data = await r.json();
-        
-        // 2. Mostrar resultado del servidor
         saveStatus.innerText = data.message || data.error || "Guardado.";
-        
     } catch (err) {
-        saveStatus.innerText = "Sin conexión.";
-        console.error(err);
+        saveStatus.innerText = "Error.";
     } finally {
-        // 3. Desbloquear botón y programar el cierre
         saveBtn.disabled = false;
         flashSaveBar();
     }
 }
 
-/* Manejo de eventos del teclado en el editor */
-editor.addEventListener('keydown', function(e) {
-    // CTRL + S
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        if (!saveBtn.disabled) guardar(); // Solo guarda si no está ya guardando
-        return;
-    }
-
-    // Tecla ESC para modo Sangría
-    if (e.key === 'Escape') {
-        sangriaActiva = !sangriaActiva;
-        indicador.style.color = sangriaActiva ? "green" : "red";
-        
-        // Feedback visual en la barra
-        saveStatus.innerText = sangriaActiva ? "Sangría: ON" : "Sangría: OFF";
-        flashSaveBar();
-        return;
-    }
-
-    // Lógica de Sangría (TAB)
-    if (e.key === 'Tab' && sangriaActiva) {
-        e.preventDefault();
-        const start = this.selectionStart;
-        const end = this.selectionEnd;
-        this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-        this.selectionStart = this.selectionEnd = start + 1;
-    }
+/* EVENTOS */
+passwordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") entrar();
 });
 
-/* Función de parpadeo/visibilidad */
-function flashSaveBar() {
-    saveWrap.classList.add("show");
-    saveWrap.style.opacity = "1";
-
-    clearTimeout(window.__saveTimer);
-
-    window.__saveTimer = setTimeout(() => {
-        saveWrap.classList.remove("show");
-        // Se oculta solo si el proceso terminó y el mouse no está encima
-        if (!saveWrap.matches(':hover')) {
-            saveWrap.style.opacity = "0";
-        }
-    }, 2000);
-}
-
-/* TEMP MESSAGE (Ajustada para manejar la opacidad) */
-function flashSaveBar() {
-    saveWrap.classList.add("show");
-    saveWrap.style.opacity = "1";
-
-    clearTimeout(window.__saveTimer);
-
-    window.__saveTimer = setTimeout(() => {
-        saveWrap.classList.remove("show");
-        // Solo ocultar si el mouse no está cerca (respetando tu lógica original)
-        saveWrap.style.opacity = "0";
-    }, 2000);
-}
-
-/* EVENTOS DEL EDITOR (Sin cambios, solo para referencia) */
 editor.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        guardar();
-        return;
-    }
-
-    if (e.key === 'Escape') {
-        sangriaActiva = !sangriaActiva;
-        indicador.style.color = sangriaActiva ? "green" : "red";
-        flashSaveBar(); // También mostramos la barra al cambiar modo sangría
-        saveStatus.innerText = sangriaActiva ? "Sangría: ON" : "Sangría: OFF";
-        return;
-    }
-
-    if (e.key === 'Tab' && sangriaActiva) {
-        e.preventDefault();
-        const start = this.selectionStart;
-        const end = this.selectionEnd;
-        this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-        this.selectionStart = this.selectionEnd = start + 1;
-    }
-});
-
-
-/* EVENTOS DEL EDITOR (Tab, Esc, Ctrl+S) */
-editor.addEventListener('keydown', function(e) {
-    // 1. CTRL + S para Guardar
+    // Ctrl + S
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (!saveBtn.disabled) guardar();
         return;
     }
 
-    // 2. Alternar modo con ESC (Ahora muestra la barra)
+    // Esc (Sangría)
     if (e.key === 'Escape') {
         e.preventDefault();
         sangriaActiva = !sangriaActiva;
-        
         indicador.style.color = sangriaActiva ? "green" : "red";
         saveStatus.innerText = sangriaActiva ? "Sangría: ON" : "Sangría: OFF";
-        
-        flashSaveBar(); // Esto hace que #saveWrap aparezca 2 segundos
+        flashSaveBar();
         return;
     }
 
-    // 3. Lógica de Sangría (TAB)
+    // Tab
     if (e.key === 'Tab' && sangriaActiva) {
         e.preventDefault();
         const start = this.selectionStart;
@@ -408,27 +321,6 @@ editor.addEventListener('keydown', function(e) {
         this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
         this.selectionStart = this.selectionEnd = start + 1;
     }
-});
-
-
-/* AUXILIARES */
-function flashSaveBar() {
-    saveWrap.classList.add("show");
-    saveWrap.style.opacity = "1"; // Forzar visibilidad inmediata
-
-    clearTimeout(window.__saveTimer);
-
-    window.__saveTimer = setTimeout(() => {
-        saveWrap.classList.remove("show");
-        // Solo ocultamos si el proceso no está "guardando" (botón habilitado)
-        if (!saveBtn.disabled) {
-            saveWrap.style.opacity = "0";
-        }
-    }, 1000);
-}
-
-document.getElementById("password").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") entrar();
 });
 
 document.addEventListener("mousemove", e => {
@@ -439,6 +331,7 @@ document.addEventListener("mousemove", e => {
     }
 });
 </script>
+
 
 </body>
 </html>
